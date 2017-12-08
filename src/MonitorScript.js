@@ -1,7 +1,8 @@
+var ownerUsername;
 updateMonitor = function() {
   axios.get('https://circleci.com/api/v1.1/projects')
   .then(response => {
-    ownerRepos = getOwnerRepos(response)
+    ownerRepos = getOwnerRepos(response.data)
     displayOwnerRepos(ownerRepos);
   })
   .catch(error => {
@@ -10,7 +11,7 @@ updateMonitor = function() {
 }
 
 isOwnerInCommitters = function(branchData) {
-  return _.contains(branchData['pusher_logins'], 'vishwasmdamle')
+  return _.contains(branchData['pusher_logins'], ownerUsername)
 }
 
 hasPushedInAnyBranch = function(repoData) {
@@ -25,8 +26,8 @@ getBranchData = function(branchDataSection, branchName) {
   }
 }
 
-getOwnerRepos = function(response) {
-  return _.chain(response.data)
+getOwnerRepos = function(data) {
+  return _.chain(data)
   .filter(hasPushedInAnyBranch)
   .map(getRepoData)
   .value()
@@ -88,5 +89,20 @@ createRepoElement = function(ownerRepo) {
   return repoElement;
 }
 
-updateMonitor();
-setInterval(updateMonitor, 5000);
+startMonitor = function() {
+  axios.get('https://circleci.com/api/v1.1/me')
+  .then(response => {
+    ownerUsername = response.data['login'];
+    if (ownerUsername) {
+      updateMonitor();
+      setInterval(updateMonitor, 10000);
+    }
+  })
+  .catch(error => {
+    document.getElementById("error-container").removeAttribute("class");
+    console.log(error);
+  });
+}
+
+startMonitor()
+

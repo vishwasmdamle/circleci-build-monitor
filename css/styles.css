@@ -12,6 +12,18 @@ body {
   display: inline;
 }
 
+.error {
+  background: maroon;
+  color: white;
+  text-align: center;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.hide {
+  display: none;
+}
+
 .repo-container {
   margin: 10px;
   padding: 20px;
