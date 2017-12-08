@@ -1,0 +1,26 @@
+body {
+  background: #aaa;
+}
+
+.badge {
+  display: block;
+  margin: 20px 0 0 0;
+}
+
+.repo-name {
+  margin: 0;
+  display: inline;
+}
+
+.repo-container {
+  margin: 10px;
+  padding: 20px;
+  display: inline-block;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.branches-section {
+  display: inline;
+  border-radius: 5px;
+}
