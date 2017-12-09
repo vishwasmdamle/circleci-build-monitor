@@ -1,5 +1,5 @@
 body {
-  background: #aaa;
+  background: #fff;
 }
 
 .badge {
@@ -8,8 +8,10 @@ body {
 }
 
 .repo-name {
-  margin: 0;
-  display: inline;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 0 0 15px 0;
+  border-bottom: 1px solid #aaa;
 }
 
 .error {
@@ -29,7 +31,8 @@ body {
   padding: 20px;
   display: inline-block;
   border-radius: 3px;
-  background: #fff;
+  background: #eee;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.08), 0 10px 20px rgba(0,0,0,0.08);
 }
 
 .branches-section {

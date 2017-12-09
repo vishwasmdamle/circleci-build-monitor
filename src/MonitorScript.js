@@ -61,11 +61,18 @@ displayOwnerRepos = function(ownerRepos) {
   })
 }
 
+buildBadgePath = function(leftText, rightText, rightColor) {
+  escapeSpecialCharacters = function(text) {
+    return text.replace(/_/g, '__').replace(/-/g, '--')
+  }
+  return escapeSpecialCharacters(leftText) + '-' + escapeSpecialCharacters(rightText) + '-' + buildColor + '.svg'
+}
+
 createRepoElement = function(ownerRepo) {
   repoElement =  document.createElement("div");
   repoElement.setAttribute("class", "repo-container" );
 
-  repoName =  document.createElement("h2");
+  repoName =  document.createElement("div");
   repoName.setAttribute("class", "repo-name" );
   repoName.innerText = ownerRepo['repoName']
   repoElement.appendChild(repoName);
@@ -82,7 +89,7 @@ createRepoElement = function(ownerRepo) {
 
     badge = document.createElement("img")
     badge.setAttribute("class", "badge");
-    badge.src = "https://img.shields.io/badge/" + branch['branchName'] + '-' + badgeText + '-' + buildColor + '.svg'
+    badge.src = "https://img.shields.io/badge/" + buildBadgePath(branch['branchName'], badgeText, buildColor)
     branchesSection.append(badge)
   })
 
