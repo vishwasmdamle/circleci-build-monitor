@@ -11,11 +11,17 @@ updateMonitor = function() {
 }
 
 isOwnerInCommitters = function(branchData) {
-  return _.contains(branchData['pusher_logins'], ownerUsername)
+  return _.contains(branchData['pusher_logins'], ownerUsername) && isRecentlyBuilt(branchData)
 }
 
 hasPushedInAnyBranch = function(repoData) {
   return _.any(repoData['branches'], isOwnerInCommitters)
+}
+
+isRecentlyBuilt = function(branchData) {
+  return branchData['recent_builds'] != undefined
+    && branchData['recent_builds'].length > 0
+    && new Date(branchData['recent_builds'][0]['pushed_at']).between((10).days().ago(), Date.now())
 }
 
 getBranchData = function(branchDataSection, branchName) {
@@ -83,8 +89,8 @@ createRepoElement = function(ownerRepo) {
 
   _.each(ownerRepo['branches'], function(branch) {
     isRunning = branch['currentlyRunningBuild'] != undefined;
-    wasRed = branch['lastExecutedBuild']['outcome'] != 'success';
-    buildColor = isRunning ? (wasRed ? 'orange' : 'yellow') : (wasRed ? 'red' : 'brightgreen')
+    wasRed = branch['lastExecutedBuild']!= undefined && branch['lastExecutedBuild']['outcome'] != 'success';
+    buildColor = isRunning ? (wasRed ? 'orange' : 'yellow') : (wasRed ? 'ff0000' : '00aa00')
     badgeText = isRunning ? 'Building' : (wasRed ? 'Failed' : 'Passed')
 
     badge = document.createElement("img")
