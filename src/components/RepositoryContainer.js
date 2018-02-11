@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
-import Date from 'date.js';
 import _ from 'underscore';
+
+import RepositoryCard from './RepositoryCard';
+//TODO: Please extract the data crunching logic to separate class for god's sake.
 
 class RepositoryContainer extends React.Component {
 
@@ -16,8 +18,20 @@ class RepositoryContainer extends React.Component {
   }
 
   componentDidMount() {
+    this.setupOwnerUsername.bind(this);
+    this.setupOwnerUsername();
     this.fetchAndRender();
     // this.clock = setInterval(this.fetchAndRender.bind(this), 5000);
+  }
+
+  setupOwnerUsername() {
+    axios.get('https://circleci.com/api/v1.1/me')
+    .then(response => {
+      this.ownerUsername = response.data['login'];
+    })
+    .catch((error) => {
+      this.setState({hasError: true}) //TODO: "Error: Request failed with status code 401" is for Login error
+    });
   }
 
   fetchAndRender() {
@@ -30,25 +44,53 @@ class RepositoryContainer extends React.Component {
 
   getRepositoryCards() {
     return this.state.repositories.map((repositoryData, index) => {
-      return (<div key={index}>{repositoryData.repoName}</div>);
+      return (<RepositoryCard key={index} repoData={repositoryData}></RepositoryCard>);
     });
   }
 
   buildRepositoriesData(response) {
     let repositories = _.chain(response.data)
-    .filter(hasPushedInAnyBranch)
-    .map(getRepoData)
+    .filter(this.hasPushedInAnyBranch.bind(this))
+    .map(this.getRepoData.bind(this))
     .value();
     this.setState({repositories: repositories})
   }
 
-
-  hasPushedInAnyBranch(repoData) {
-    return _.any(repoData['branches'], isOwnerInCommitters)
+  getRepoData(repoData) {
+    return {
+      'repoName': repoData['reponame'],
+      'branches': this.getOwnerBranches.bind(this)(repoData)
+    }
   }
 
+  getOwnerBranches(repoData) {
+    return _.reject(_.map(repoData['branches'], function(val, key) {
+      if (this.isOwnerInCommitters(val)) {
+        return this.getBranchData.bind(this)(val, key);
+      }
+    }.bind(this)), _.isUndefined)
+  }
+
+  hasPushedInAnyBranch(repoData) {
+    return _.any(repoData['branches'], this.isOwnerInCommitters.bind(this))
+  }
+
+  getBranchData(branchDataSection, branchName) {
+    return {
+      branchName: branchName,
+      lastExecutedBuild: _.first(branchDataSection['recent_builds']),
+      currentlyRunningBuild: this.getRunningBuilds(branchDataSection)
+    }
+  }
+
+  getRunningBuilds(branchDataSection) {
+    return _.first(_.filter(branchDataSection['running_builds'], function(buildData) {
+       return buildData['status'] == 'running'
+     }))
+   }
+
   isOwnerInCommitters(branchData) {
-    return _.contains(branchData['pusher_logins'], ownerUsername) && isRecentlyBuilt(branchData)
+    return _.contains(branchData['pusher_logins'], this.ownerUsername) && this.isRecentlyBuilt(branchData)
   }
 
   isRecentlyBuilt(branchData) {
