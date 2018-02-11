@@ -21,7 +21,7 @@ class RepositoryContainer extends React.Component {
     this.setupOwnerUsername.bind(this);
     this.setupOwnerUsername();
     this.fetchAndRender();
-    // this.clock = setInterval(this.fetchAndRender.bind(this), 5000);
+    this.recurringInterval = setInterval(this.fetchAndRender.bind(this), 5000);
   }
 
   setupOwnerUsername() {
